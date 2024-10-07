@@ -11,7 +11,7 @@ defaults:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: windows-latest
     steps:
       - name: Cleanup
         run: Remove-Item * -Recurse -Force -Confirm:$false -ErrorAction Ignore
