@@ -32,21 +32,33 @@ jobs:
       - name: Create UE directory
         run: mkdir ue
 
+      # - name: Download, Extract and Setup UE
+      #   working-directory: C:/SML/ue
+      #   run: |
+      #     gh release download --repo Kvalyr/UnrealEngine-CSS -p "UnrealEngine-CSS-Editor-Win64.7z.*"
+      #     7z x UnrealEngine-CSS-Editor-Win64.7z.001
+      #     rm UnrealEngine-CSS-Editor-Win64.7z*
+      #     .\\SetupScripts\\Register.bat
+
       - name: Download, Extract and Setup UE
         working-directory: C:/SML/ue
         run: |
-          gh release download --repo Kvalyr/UnrealEngine-CSS -p "UnrealEngine-CSS-Editor-Win64.7z.*"
+          Invoke-WebRequest -Uri "https://github.com/Backblaze/B2_Command_Line_Tool/releases/latest/download/b2-windows.exe" -OutFile "b2.exe"
+          .\b2.exe account authorize "${{ secrets.B2_KEY_ID }}" "${{ secrets.B2_KEY }}"
+          .\b2.exe file download "b2://${{ secrets.B2_BUCKET }}/UnrealEngine-CSS-Editor-Win64.7z.001" "UnrealEngine-CSS-Editor-Win64.7z.001"
+          .\b2.exe file download "b2://${{ secrets.B2_BUCKET }}/UnrealEngine-CSS-Editor-Win64.7z.002" "UnrealEngine-CSS-Editor-Win64.7z.002"
+          .\b2.exe file download "b2://${{ secrets.B2_BUCKET }}/UnrealEngine-CSS-Editor-Win64.7z.003" "UnrealEngine-CSS-Editor-Win64.7z.003"
           7z x UnrealEngine-CSS-Editor-Win64.7z.001
           rm UnrealEngine-CSS-Editor-Win64.7z*
           .\\SetupScripts\\Register.bat
 
-      # - name: Download and Extract Wwise
-      #   run: |
-      #     Invoke-WebRequest -Uri "https://github.com/Backblaze/B2_Command_Line_Tool/releases/latest/download/b2-windows.exe" -OutFile "b2.exe"
-      #     .\b2.exe account authorize "${{ secrets.WWISE_B2_KEY_ID }}" "${{ secrets.WWISE_B2_KEY }}"
-      #     .\b2.exe file download "b2://${{ secrets.WWISE_B2_BUCKET }}/Wwise.7z" "Wwise.7z"
-      #     7z x -aoa Wwise.7z -oSML\\Plugins\\
-      #     rm Wwise.7z
+      - name: Download and Extract Wwise
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/Backblaze/B2_Command_Line_Tool/releases/latest/download/b2-windows.exe" -OutFile "b2.exe"
+          .\b2.exe account authorize "${{ secrets.B2_KEY_ID }}" "${{ secrets.B2_KEY }}"
+          .\b2.exe file download "b2://${{ secrets.B2_BUCKET }}/wwise.7z" "wwise.7z"
+          7z x -aoa Wwise.7z -oSML\\Plugins\\
+          rm Wwise.7z
 
       - name: Build for Development Editor
         run: .\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryEditor Win64 Development -project="C:\\SML\\SML\\FactoryGame.uproject"
@@ -56,7 +68,13 @@ jobs:
 
       - name: Archive SML artifact
         uses: actions/upload-artifact@v4
-        if: ${{ github.event_name == 'push' }}
         with:
           name: sml
           path: SML\\Saved\\ArchivedPlugins\\SML\\*.zip
+
+      # - name: Archive SML artifact (push)
+      #   uses: actions/upload-artifact@v4
+      #   if: ${{ github.event_name == 'push' }}
+      #   with:
+      #     name: sml
+      #     path: SML\\Saved\\ArchivedPlugins\\SML\\*.zip
