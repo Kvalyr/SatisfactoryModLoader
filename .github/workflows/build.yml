@@ -57,8 +57,8 @@ jobs:
           Invoke-WebRequest -Uri "https://github.com/Backblaze/B2_Command_Line_Tool/releases/latest/download/b2-windows.exe" -OutFile "b2.exe"
           .\b2.exe account authorize "${{ secrets.B2_KEY_ID }}" "${{ secrets.B2_KEY }}"
           .\b2.exe file download "b2://${{ secrets.B2_BUCKET }}/wwise.7z" "wwise.7z"
-          7z x -aoa Wwise.7z -oSML\\Plugins\\
-          rm Wwise.7z
+          7z x -aoa wwise.7z -oSML\\Plugins\\
+          rm wwise.7z
 
       - name: Build for Development Editor
         run: .\\ue\\Engine\\Build\\BatchFiles\\Build.bat FactoryEditor Win64 Development -project="C:\\SML\\SML\\FactoryGame.uproject"
